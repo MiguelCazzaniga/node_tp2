@@ -6,8 +6,13 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 const productsRouter = require('./routes/products');
+const categoriesRouter=require("./routes/categories")
+const usersRouter=require("./routes/usuarios")
+const jwt = require("jsonwebtoken")
 
 var app = express();
+
+app.set("secretKey","Node_TP3")
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,7 +25,29 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/products', productsRouter);
+app.use('/products',productsRouter);
+//app.use('/products', verifyToken,productsRouter);
+app.use('/categories', categoriesRouter);
+app.use('/users',usersRouter)
+
+function verifyToken(req,res,next){
+  const authHeader=req.headers['authorization']
+  if(authHeader){
+  const token=authHeader.split(" ")[1]
+  jwt.verify(token, req.app.get("secretKey"),function(error,payload){
+    if(error){
+      res.status(401).json({message:error.message})
+    }else{
+      console.log(payload)
+      next()
+      return
+    }
+  })
+}else{
+    return res.status(401).json({message:"Token must be provided"})
+}
+}
+app.verifyToken=verifyToken;
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

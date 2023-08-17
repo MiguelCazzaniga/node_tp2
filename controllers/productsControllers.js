@@ -4,6 +4,10 @@ const ProductsModel =require("../models/productsModels")
 const getAll = async function(req,res,next){
   try {
     const documents=await ProductsModel.find()
+    .populate({path:"category", select:"name"})
+    .sort({price:-1,title:1})
+    .select("title price")
+      
     res.status(200).json(documents)
   } catch (e) {
     console.log(e)
@@ -30,7 +34,8 @@ const nuevoArticulo= async function(req,res,next){
     title:req.body.title,
     price:req.body.price,
     description:req.body.description,
-    quantity:req.body.quantity
+    quantity:req.body.quantity,
+    category:req.body.category,
 
   })
   const document=await product.save()
